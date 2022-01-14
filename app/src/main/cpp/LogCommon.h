@@ -2,8 +2,13 @@
 // Created by feng on 2020/4/18.
 //
 
+<<<<<<< HEAD
 #ifndef MEDIALEARN_LOGCOMMON_H
 #define MEDIALEARN_LOGCOMMON_H
+=======
+#ifndef FFMPEGPLAYER_LOGCOMMON_H
+#define FFMPEGPLAYER_LOGCOMMON_H
+>>>>>>> first commit
 #include <jni.h>
 #include <android/log.h>
 #define LOG_TAG "COMMON_TAG" // 这个是自定义的LOG的标识

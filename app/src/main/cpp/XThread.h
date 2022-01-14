@@ -10,8 +10,12 @@ class XThread {
 public:
     virtual void start();
     virtual void stop();
+<<<<<<< HEAD
 protected:
     virtual void run() = 0;
+=======
+    virtual void run(){}
+>>>>>>> first commit
 private:
     void threadMain();
 };
