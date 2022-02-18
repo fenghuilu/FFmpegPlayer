@@ -1,4 +1,4 @@
-package com.feng.ffmpegplayer;
+package com.feng.opengldemo;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -9,7 +9,7 @@ public class MainActivity extends AppCompatActivity {
 
     // Used to load the 'native-lib' library on application startup.
     static {
-        System.loadLibrary("ffmpegplayer");
+        System.loadLibrary("native-lib");
     }
 
     @Override

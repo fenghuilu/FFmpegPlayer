@@ -8,7 +8,8 @@
 
 struct XData {
     unsigned char *data = 0;
-    int size;
+    int size = 0;
+    bool isAudio = false;
 
     void drop();
 

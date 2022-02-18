@@ -27,6 +27,8 @@ bool FFDemux::open(const char *url) {
     }
     totalMs = avFormatContext->duration / (AV_TIME_BASE / 1000);
     LOGD("totalMs = %d ", totalMs);
+    getVPara();
+    getAPara();
     return true;
 }
 
@@ -41,8 +43,15 @@ XData FFDemux::read() {
         return XData();
     }
     LOGD("pkt size is %d ,pts %lld", pkt->size, pkt->pts);
-    data.data = (unsigned char *)pkt;
+    data.data = (unsigned char *) pkt;
     data.size = pkt->size;
+    if(pkt->stream_index == audioStream){
+        data.isAudio = true;
+    }else if(pkt->stream_index == videoStream){
+        data.isAudio = false;
+    } else {
+        av_packet_free(&pkt);
+    }
     return data;
 }
 
@@ -57,4 +66,37 @@ FFDemux::FFDemux() {
         //初始化网络
         avformat_network_init();
     }
+}
+
+XParameter FFDemux::getVPara() {
+    if (!avFormatContext) {
+        LOGE("getVPara failed avFormatContext is null");
+
+        return XParameter();
+    }
+    int re = av_find_best_stream(avFormatContext, AVMEDIA_TYPE_VIDEO, -1, -1, 0, 0);
+    if (re < 0) {
+        LOGE("av_find_best_stream failed");
+        return XParameter();
+    }
+    videoStream = re;
+    XParameter para;
+    para.para = avFormatContext->streams[re]->codecpar;
+    return para;
+}
+XParameter FFDemux::getAPara() {
+    if (!avFormatContext) {
+        LOGE("getAPara failed avFormatContext is null");
+
+        return XParameter();
+    }
+    int re = av_find_best_stream(avFormatContext, AVMEDIA_TYPE_AUDIO, -1, -1, 0, 0);
+    if (re < 0) {
+        LOGE("av_find_best_stream failed");
+        return XParameter();
+    }
+    audioStream = re;
+    XParameter para;
+    para.para = avFormatContext->streams[re]->codecpar;
+    return para;
 }

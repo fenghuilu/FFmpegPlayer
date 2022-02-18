@@ -6,10 +6,11 @@
 #include "LogCommon.h"
 
 void IDemux::run() {
-    for(;;){
+    while (!isExit) {
         XData d = read();
-        LOGD("IDemux read %d",d.size);
-        if(d.size<=0){
+        if (d.size > 0) {
+            notify(d);
+        } else {
             break;
         }
     }

@@ -133,12 +133,12 @@ target_link_libraries( # Specifies the target library.
         GLESv2
         EGL
         OpenSLES
-        avcodec
         avfilter
         avformat
-        avutil
+        avcodec
         swresample
         swscale
+        avutil
         # Links the target library to the log library
         # included in the NDK.
         ${log-lib})
