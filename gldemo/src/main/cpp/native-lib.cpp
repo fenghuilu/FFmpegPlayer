@@ -68,13 +68,13 @@ Java_com_feng_opengldemo_MainActivity_stringFromJNI(
 JNIEXPORT void JNICALL
 Java_com_feng_opengldemo_XPlay_open(JNIEnv *env, jobject thiz, jstring url, jobject surface) {
     // TODO: implement open()
-    const char* nurl = env->GetStringUTFChars(url,JNI_FALSE);
-    FILE *fp = fopen(nurl, "rb");
-    env->ReleaseStringUTFChars(url,nurl);
-    if (!fp) {
-        LOGD("fopen failed %s", url);
-        return;
-    }
+//    const char* nurl = env->GetStringUTFChars(url,JNI_FALSE);
+//    FILE *fp = fopen(nurl, "rb");
+//    env->ReleaseStringUTFChars(url,nurl);
+//    if (!fp) {
+//        LOGD("fopen failed %s", url);
+//        return;
+//    }
     ANativeWindow *nwin = ANativeWindow_fromSurface(env, surface);
     EGLDisplay display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
     eglInitialize(display, 0, 0);
@@ -84,8 +84,8 @@ Java_com_feng_opengldemo_XPlay_open(JNIEnv *env, jobject thiz, jstring url, jobj
     //input
     EGLint configSpec[] = {
             EGL_RED_SIZE, 8,
-            EGL_BLUE_SIZE, 8,
             EGL_GREEN_SIZE, 8,
+            EGL_BLUE_SIZE, 8,
             EGL_SURFACE_TYPE, EGL_WINDOW_BIT, EGL_NONE
     };
     eglChooseConfig(display, configSpec, &config, 1, &configNum);
@@ -112,11 +112,13 @@ Java_com_feng_opengldemo_XPlay_open(JNIEnv *env, jobject thiz, jstring url, jobj
 
     glUseProgram(program);
 
+
+
     static float vers[] = {
             1.0f, -1.0f, 0.0f,
             -1.0f, -1.0f, 0.0f,
             1.0f, 1.0f, 0.0f,
-            -1.0f, 1.0f, 0.0f
+            -1.0f, 1.0f, 0.0f,
     };
     GLuint apos = (GLuint) glGetAttribLocation(program, "aPostion");
     glEnableVertexAttribArray(apos);
@@ -126,11 +128,14 @@ Java_com_feng_opengldemo_XPlay_open(JNIEnv *env, jobject thiz, jstring url, jobj
             1.0f, 0.0f,
             0.0f, 0.0f,
             1.0f, 1.0f,
-            0.0f, 1.0f
+            0.0f, 1.0f,
     };
     GLuint atxt = (GLuint) glGetAttribLocation(program, "aTextCoord");
     glEnableVertexAttribArray(atxt);
     glVertexAttribPointer(atxt, 2, GL_FLOAT, GL_FALSE, 8, txts);
+
+    int width = 424;
+    int height = 240;
 
     glUniform1i(glGetUniformLocation(program, "yTextture"), 0);
     glUniform1i(glGetUniformLocation(program, "uTextture"), 1);
@@ -138,8 +143,6 @@ Java_com_feng_opengldemo_XPlay_open(JNIEnv *env, jobject thiz, jstring url, jobj
     GLuint texts[3] = {0};
     glGenTextures(3, texts);
 
-    int width = 424;
-    int height = 240;
 
     glBindTexture(GL_TEXTURE_2D, texts[0]);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -187,14 +190,14 @@ Java_com_feng_opengldemo_XPlay_open(JNIEnv *env, jobject thiz, jstring url, jobj
     buf[2] = new unsigned char[width * height / 4];
     for (int i = 0; i < 10000; i++) {
 
-        if (feof(fp) == 0) {
-            fread(buf[0], 1, width * height, fp);
-            fread(buf[1], 1, width * height/4, fp);
-            fread(buf[2], 1, width * height/4, fp);
-        }
-//        memset(buf[0], i, width * height);
-//        memset(buf[1], i, width * height / 4);
-//        memset(buf[2], i, width * height / 4);
+//        if (feof(fp) == 0) {
+//            fread(buf[0], 1, width * height, fp);
+//            fread(buf[1], 1, width * height/4, fp);
+//            fread(buf[2], 1, width * height/4, fp);
+//        }
+        memset(buf[0], i, width * height);
+        memset(buf[1], i, width * height / 4);
+        memset(buf[2], i, width * height / 4);
 
         //纹理的修改和显示
         glActiveTexture(GL_TEXTURE0);
@@ -202,11 +205,11 @@ Java_com_feng_opengldemo_XPlay_open(JNIEnv *env, jobject thiz, jstring url, jobj
         glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_LUMINANCE, GL_UNSIGNED_BYTE,
                         buf[0]);
 
-        glActiveTexture(GL_TEXTURE1);
+        glActiveTexture(GL_TEXTURE0+1);
         glBindTexture(GL_TEXTURE_2D, texts[1]);
         glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width/2, height/2, GL_LUMINANCE, GL_UNSIGNED_BYTE,
                         buf[1]);
-        glActiveTexture(GL_TEXTURE2);
+        glActiveTexture(GL_TEXTURE0+2);
         glBindTexture(GL_TEXTURE_2D, texts[2]);
         glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width/2, height/2, GL_LUMINANCE, GL_UNSIGNED_BYTE,
                         buf[2]);

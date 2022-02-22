@@ -12,6 +12,8 @@ public:
 
     static XEGL *get();
 
+    virtual void draw() = 0;
+
 protected:
     XEGL() {}
 };

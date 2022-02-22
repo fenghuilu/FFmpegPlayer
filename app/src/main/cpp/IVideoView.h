@@ -6,7 +6,15 @@
 #define FFMPEGPLAYER_IVIDEOVIEW_H
 
 
-class IVideoView {
+#include "XData.h"
+#include "IObserver.h"
+
+class IVideoView : public IObserver{
+public:
+
+    virtual void setRender(void *win) = 0;
+    virtual void render(XData data) = 0;
+    virtual void updata(XData data);
 
 };
 

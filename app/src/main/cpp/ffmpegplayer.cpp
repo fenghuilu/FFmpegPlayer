@@ -5,44 +5,45 @@
 #include "IDecode.h"
 #include "FFDecode.h"
 #include "XEGL.h"
+#include "XShader.h"
+#include "IVideoView.h"
+#include "GLVideoView.h"
 
 #define LOG_TAG "ffmpegplayer"
-
-class g;
-
-class g;
-
+IVideoView *view;
 extern "C" JNIEXPORT jstring JNICALL
-Java_com_feng_ffmpegplayer_MainActivity_stringFromJNI(
+Java_com_feng_ffmpegplayer_MainActivity_open(
         JNIEnv *env,
-        jobject /* this */) {
-    std::string hello = "Hello from C++";
+        jobject thiz, jstring url_) {
+    LOGD("open");
+    const char *url = env->GetStringUTFChars(url_,JNI_FALSE);
     IDemux *demux = new FFDemux();
     IDecode *vdecode = new FFDecode();
     IDecode *adecode = new FFDecode();
+    view = new GLVideoView();
 
     demux->addObs(vdecode);
     demux->addObs(adecode);
+    vdecode->addObs(view);
 
-    demux->open("/storage/emulated/0/Android/data/com.feng.ffmpegplayer/cache/test.mp4");
+    demux->open(url);
     vdecode->open(demux->getVPara());
     adecode->open(demux->getAPara());
 
     demux->start();
     vdecode->start();
     adecode->start();
-//    XSleep(3000);
-//    de->stop();
+
+    env->ReleaseStringUTFChars(url_,NULL);
+
+    std::string hello = "Hello from C++";
     return env->NewStringUTF(hello.c_str());
 }
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_feng_ffmpegplayer_XPlay_initView(JNIEnv *env, jobject thiz, jobject surface) {
     // TODO: implement initView()
+    LOGD("initView");
     ANativeWindow *win = ANativeWindow_fromSurface(env, surface);
-    XEGL::get()->init(win);
-}extern "C"
-JNIEXPORT jstring JNICALL
-Java_com_feng_opengldemo_MainActivity_stringFromJNI(JNIEnv *env, jobject thiz) {
-    // TODO: implement stringFromJNI()
+    view->setRender(win);
 }

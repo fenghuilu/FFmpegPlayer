@@ -60,7 +60,7 @@ XData FFDecode::recvFrame() {
     }
     int re = avcodec_receive_frame(avCodecContext, avFrame);
     if (re != 0) {
-        if(re == AVERROR(EAGAIN)){
+        if (re == AVERROR(EAGAIN)) {
 //            LOGE("avcodec_receive_frame need send more packet");
         } else {
             LOGE("avcodec_receive_frame failed %s ", av_err2str(re));
@@ -75,12 +75,18 @@ XData FFDecode::recvFrame() {
         d.isAudio = false;
         d.size = (avFrame->linesize[0] + avFrame->linesize[1] + avFrame->linesize[2]) *
                  avFrame->height;
-        LOGD("video %d %d %d %d",avFrame->linesize[0],avFrame->linesize[1],avFrame->linesize[2],avFrame->height);
+        d.width = avFrame->width;
+        d.height = avFrame->height;
+        LOGD("video %d %d %d %d", avFrame->linesize[0], avFrame->linesize[1], avFrame->linesize[2],
+             avFrame->height);
     } else {
         //样本字节数*单通道样本数*通道数
         d.isAudio = true;
-        d.size = av_get_bytes_per_sample((AVSampleFormat)avFrame->format)*avFrame->nb_samples*2;
-        LOGD("audio %d %d ",av_get_bytes_per_sample((AVSampleFormat)avFrame->format),avFrame->nb_samples);
+        d.size =
+                av_get_bytes_per_sample((AVSampleFormat) avFrame->format) * avFrame->nb_samples * 2;
+        LOGD("audio %d %d ", av_get_bytes_per_sample((AVSampleFormat) avFrame->format),
+             avFrame->nb_samples);
     }
+    memcpy(d.datas, avFrame->data, sizeof(d.datas));
     return d;
 }

@@ -3,3 +3,11 @@
 //
 
 #include "IVideoView.h"
+#include "LogCommon.h"
+
+void IVideoView::updata(XData data) {
+    LOGD("IVideoView updata");
+    if (!data.isAudio) {
+        this->render(data);
+    }
+}
