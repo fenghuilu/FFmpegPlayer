@@ -17,9 +17,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Log.d("haha","getExternalCacheDir().getAbsolutePath() "+getExternalCacheDir().getAbsolutePath());
-        Log.d("haha","getDataDir().getAbsolutePath() "+getCacheDir().getAbsolutePath());
-        open(getCacheDir().getAbsolutePath()+"/test.mp4");
+        Log.d("haha", "MainActivity onCreate");
+
+        open("/Android/data/com.feng.ffmpegplayer/cache/test.mp4");
     }
 
     /**

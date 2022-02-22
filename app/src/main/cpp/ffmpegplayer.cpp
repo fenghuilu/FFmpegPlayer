@@ -9,7 +9,7 @@
 #include "IVideoView.h"
 #include "GLVideoView.h"
 
-#define LOG_TAG "ffmpegplayer"
+#define LOG_TAG "ffmpegplayer_tag"
 IVideoView *view;
 extern "C" JNIEXPORT jstring JNICALL
 Java_com_feng_ffmpegplayer_MainActivity_open(
@@ -34,7 +34,7 @@ Java_com_feng_ffmpegplayer_MainActivity_open(
     vdecode->start();
     adecode->start();
 
-    env->ReleaseStringUTFChars(url_,NULL);
+    env->ReleaseStringUTFChars(url_,url);
 
     std::string hello = "Hello from C++";
     return env->NewStringUTF(hello.c_str());

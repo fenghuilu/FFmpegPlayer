@@ -14,8 +14,7 @@ public:
 
     virtual void setRender(void *win) = 0;
     virtual void render(XData data) = 0;
-    virtual void updata(XData data);
-
+    virtual void update(XData data);
 };
 
 

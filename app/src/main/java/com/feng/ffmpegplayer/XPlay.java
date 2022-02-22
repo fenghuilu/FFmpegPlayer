@@ -3,6 +3,7 @@ package com.feng.ffmpegplayer;
 import android.content.Context;
 import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.SurfaceHolder;
 
 import javax.microedition.khronos.egl.EGLConfig;
@@ -20,6 +21,10 @@ public class XPlay extends GLSurfaceView implements SurfaceHolder.Callback ,GLSu
     public void surfaceCreated(SurfaceHolder holder) {
 //        super.surfaceCreated(holder);
         //初始化EGL
+<<<<<<< HEAD
+=======
+        Log.d("haha","surfaceCreated");
+>>>>>>> feat opengl add
         setRenderer(this);
         initView(holder.getSurface());
     }
