@@ -21,10 +21,7 @@ public class XPlay extends GLSurfaceView implements SurfaceHolder.Callback ,GLSu
     public void surfaceCreated(SurfaceHolder holder) {
 //        super.surfaceCreated(holder);
         //初始化EGL
-<<<<<<< HEAD
-=======
         Log.d("haha","surfaceCreated");
->>>>>>> feat opengl add
         setRenderer(this);
         initView(holder.getSurface());
     }

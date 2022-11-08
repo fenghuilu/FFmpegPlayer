@@ -22,83 +22,24 @@ aux_source_directory(. ffmpegplayer_source_dir)
 
 include_directories(${CMAKE_SOURCE_DIR}/include)
 
-add_library(
-        avcodec
-        SHARED
-        IMPORTED
-)
+add_library(avcodec SHARED IMPORTED)
+set_target_properties(avcodec PROPERTIES IMPORTED_LOCATION ${ffmpeg_lib_dir}/libavcodec.so)
 
-#指定库的位置
-set_target_properties(
-        avcodec
-        PROPERTIES IMPORTED_LOCATION
-        ${ffmpeg_lib_dir}/libavcodec.so
-)
+add_library(avfilter SHARED IMPORTED)
+set_target_properties(avfilter PROPERTIES IMPORTED_LOCATION ${ffmpeg_lib_dir}/libavfilter.so)
 
-add_library(
-        avfilter
-        SHARED
-        IMPORTED
-)
+add_library(avformat SHARED IMPORTED)
+set_target_properties(avformat PROPERTIES IMPORTED_LOCATION ${ffmpeg_lib_dir}/libavformat.so)
 
-#指定库的位置
-set_target_properties(
-        avfilter
-        PROPERTIES IMPORTED_LOCATION
-        ${ffmpeg_lib_dir}/libavfilter.so
-)
+add_library(avutil SHARED IMPORTED)
+set_target_properties(avutil PROPERTIES IMPORTED_LOCATION ${ffmpeg_lib_dir}/libavutil.so)
 
-add_library(
-        avformat
-        SHARED
-        IMPORTED
-)
+add_library(swscale SHARED IMPORTED)
+set_target_properties(swscale PROPERTIES IMPORTED_LOCATION ${ffmpeg_lib_dir}/libswscale.so)
 
-#指定库的位置
-set_target_properties(
-        avformat
-        PROPERTIES IMPORTED_LOCATION
-        ${ffmpeg_lib_dir}/libavformat.so
-)
+add_library(swresample SHARED IMPORTED)
+set_target_properties(swresample PROPERTIES IMPORTED_LOCATION ${ffmpeg_lib_dir}/libswresample.so)
 
-add_library(
-        avutil
-        SHARED
-        IMPORTED
-)
-
-#指定库的位置
-set_target_properties(
-        avutil
-        PROPERTIES IMPORTED_LOCATION
-        ${ffmpeg_lib_dir}/libavutil.so
-)
-
-add_library(
-        swresample
-        SHARED
-        IMPORTED
-)
-
-#指定库的位置
-set_target_properties(
-        swresample
-        PROPERTIES IMPORTED_LOCATION
-        ${ffmpeg_lib_dir}/libswresample.so
-)
-
-add_library(
-        swscale
-        SHARED
-        IMPORTED
-)
-
-#指定库的位置
-set_target_properties(
-        swscale
-        PROPERTIES IMPORTED_LOCATION
-        ${ffmpeg_lib_dir}/libswscale.so
-)
 
 
 add_library( # Sets the name of the library.
@@ -136,9 +77,9 @@ target_link_libraries( # Specifies the target library.
         avfilter
         avformat
         avcodec
+        avutil
         swresample
         swscale
-        avutil
         # Links the target library to the log library
         # included in the NDK.
         ${log-lib})

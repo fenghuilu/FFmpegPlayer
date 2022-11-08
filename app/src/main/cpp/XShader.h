@@ -4,14 +4,19 @@
 
 #ifndef FFMPEGPLAYER_XSHADER_H
 #define FFMPEGPLAYER_XSHADER_H
+enum XShaderType {
+    XSHADER_YUV420P = 0,
+    XSHADER_NV12 = 25,
+    XSHADER_NV21 = 26
 
+};
 
 class XShader {
 public:
-    virtual bool init();
+    virtual bool init(XShaderType type = XSHADER_YUV420P);
 
     //获取材质并映射到内存
-    virtual void getTexture(unsigned int index, int width, int height, unsigned char *buff);
+    virtual void getTexture(unsigned int index, int width, int height, unsigned char *buff, bool isAlphe = false) ;
 
     virtual void draw();
 

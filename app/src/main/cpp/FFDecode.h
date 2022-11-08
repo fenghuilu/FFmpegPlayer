@@ -11,12 +11,12 @@ extern "C" {
 }
 #include "XParameter.h"
 #include "IDecode.h"
-
 struct AVCodecContext;
 
 class FFDecode : public IDecode {
 public:
-    bool open(XParameter parameter);
+    static void initHard(void *vm);
+    bool open(XParameter parameter,bool isHard = false);
 
 //future模型 发送数据到线程解码
     virtual bool sendPacket(XData pkt);

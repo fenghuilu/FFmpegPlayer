@@ -10,10 +10,12 @@
 #include "XData.h"
 #include "IObserver.h"
 #include <list>
+
 #define LOG_TAG "IDecode"
+
 class IDecode : public IObserver {
 public:
-    virtual bool open(XParameter parameter) = 0;
+    virtual bool open(XParameter parameter, bool isHard = false) = 0;
 
     //future模型 发送数据到线程解码
     virtual bool sendPacket(XData pkt) = 0;
@@ -28,6 +30,7 @@ public:
     int maxList = 100;
 protected:
     virtual void run();
+
     //缓存
     std::list<XData> pkts;
     std::mutex pktsmutex;
