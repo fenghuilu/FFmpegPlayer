@@ -7,6 +7,7 @@ extern "C" {
 
 #include "FFDecode.h"
 #include "LogCommon.h"
+
 #define LOG_TAG "FFDecode" // 这个是自定义的LOG的标识
 
 void FFDecode::initHard(void *vm) {
@@ -14,16 +15,16 @@ void FFDecode::initHard(void *vm) {
 }
 
 bool FFDecode::open(XParameter parameter, bool isHard) {
-    LOGD("FFDecode::open  %d", isHard);
+    LOGD("FFDecode::open  %d ", isHard);
     if (!parameter.para) {
         LOGD("!parameter.para???");
         return false;
     }
     AVCodecParameters *p = parameter.para;
     AVCodec *avCodec = avcodec_find_decoder(p->codec_id);
-//    if (isHard) {//so可能不支持硬件解码
-//        avCodec = avcodec_find_decoder_by_name("h264_mediacodec");
-//    }
+    if (isHard) {//so可能不支持硬件解码
+        avCodec = avcodec_find_decoder_by_name("h264_mediacodec");
+    }
     if (!avCodec) {
         LOGE("avcodec_find_decoder %d failed! %d ", p->codec_id, isHard);
         return false;
@@ -92,37 +93,43 @@ XData FFDecode::recvFrame() {
                  avFrame->height;
         d.width = avFrame->width;
         d.height = avFrame->height;
-        LOGD("video %d %d %d %d", avFrame->linesize[0], avFrame->linesize[1], avFrame->linesize[2],
-             avFrame->height);
-
-        d.datas[0] = new unsigned char[avFrame->width * avFrame->height];
-        for (int i = 0; i < avFrame->height; ++i) {
-            memcpy(d.datas[0] + i * avFrame->width, avFrame->data[0] + i * avFrame->linesize[0],
-                   avFrame->width);
-        }
-
-        d.datas[1] = new unsigned char[avFrame->width * avFrame->height / 4];
-        for (int i = 0; i < avFrame->height / 2; ++i) {
-
-            memcpy(d.datas[1] + i * avFrame->width / 2, avFrame->data[1] + i * avFrame->linesize[1],
-                   avFrame->width / 2);
-        }
-
-        d.datas[2] = new unsigned char[avFrame->width * avFrame->height / 4];
-        for (int i = 0; i < avFrame->height / 2; ++i) {
-            memcpy(d.datas[2] + i * avFrame->width / 2, avFrame->data[2] + i * avFrame->linesize[2],
-                   avFrame->width / 2);
-        }
         d.format = avFrame->format;
-        LOGD("data format is %d ", d.format);
+//        LOGD("video %d %d %d %d", avFrame->linesize[0], avFrame->linesize[1], avFrame->linesize[2],
+//             avFrame->height);
+//        LOGD("data format is %d ", d.format);
+
+        if (d.format == 0) {//YUV420P 需要对齐
+            d.datas[0] = new unsigned char[avFrame->width * avFrame->height];
+            for (int i = 0; i < avFrame->height; ++i) {
+                memcpy(d.datas[0] + i * avFrame->width, avFrame->data[0] + i * avFrame->linesize[0],
+                       avFrame->width);
+            }
+
+            d.datas[1] = new unsigned char[avFrame->width * avFrame->height / 4];
+            for (int i = 0; i < avFrame->height / 2; ++i) {
+
+                memcpy(d.datas[1] + i * avFrame->width / 2,
+                       avFrame->data[1] + i * avFrame->linesize[1],
+                       avFrame->width / 2);
+            }
+
+            d.datas[2] = new unsigned char[avFrame->width * avFrame->height / 4];
+            for (int i = 0; i < avFrame->height / 2; ++i) {
+                memcpy(d.datas[2] + i * avFrame->width / 2,
+                       avFrame->data[2] + i * avFrame->linesize[2],
+                       avFrame->width / 2);
+            }
+        } else {//NV21,NV12
+            memcpy(d.datas,avFrame->data, sizeof(d.datas));
+        }
     } else {
         //样本字节数*单通道样本数*通道数
         d.isAudio = true;
         d.size =
                 av_get_bytes_per_sample((AVSampleFormat) avFrame->format) *
                 avFrame->nb_samples * 2;
-        LOGD("audio %d %d ", av_get_bytes_per_sample((AVSampleFormat) avFrame->format),
-             avFrame->nb_samples);
+//        LOGD("audio %d %d ", av_get_bytes_per_sample((AVSampleFormat) avFrame->format),
+//             avFrame->nb_samples);
         memcpy(d.datas, avFrame->data, sizeof(d.datas));
     }
     return d;
