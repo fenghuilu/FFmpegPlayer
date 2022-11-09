@@ -16,6 +16,8 @@ public:
 
     //打开文件或者流媒体 rtsp rmtp http
     virtual bool open(const char *url) =0;
+    virtual void close() = 0;
+
     //读取一帧数据，数据由调用者清理
     virtual XData read() = 0;
 

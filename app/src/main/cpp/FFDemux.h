@@ -7,6 +7,7 @@
 
 #include "IDemux.h"
 #include "LogCommon.h"
+#include <mutex>
 
 #define LOG_TAG "FFDemux"
 struct AVFormatContext;
@@ -16,9 +17,12 @@ public:
     //打开文件或者流媒体 rtsp rmtp http
     virtual bool open(const char *url);
 
+    virtual void close();
+
     XParameter getVPara();
 
     XParameter getAPara();
+
     //读取一帧数据，数据由调用者清理
     virtual XData read();
 
@@ -26,6 +30,7 @@ public:
 
 private:
     AVFormatContext *avFormatContext = 0;
+    std::mutex mux;
     int audioStream = 1;
     int videoStream = 0;
 };

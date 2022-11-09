@@ -12,14 +12,25 @@ static double r2d(AVRational r) {
     return r.num == 0 || r.den == 0 ? 0. : (double) r.num / (double) r.den;
 }
 
+void FFDemux::close() {
+    mux.lock();
+    if (avFormatContext) {
+        avformat_close_input(&avFormatContext);
+    }
+    mux.unlock();
+}
+
 //打开文件或者流媒体 rtsp rmtp http
 bool FFDemux::open(const char *url) {
     LOGD("open %s", url);
+    close();
+    mux.lock();
     int res = avformat_open_input(&avFormatContext, url, 0, 0);
     if (res != 0) {
         char buf[1024] = {0};
         av_strerror(res, buf, sizeof(buf));
         LOGE("avformat_open_input %s failed %s ", url, av_err2str(res));
+        mux.unlock();
         return false;
     }
     LOGD("open %s success ", url);
@@ -28,10 +39,12 @@ bool FFDemux::open(const char *url) {
         char buf[1024] = {0};
         av_strerror(res, buf, sizeof(buf));
         LOGE("avformat_find_stream_info %s failed %s ", url, av_err2str(res));
+        mux.unlock();
         return false;
     }
     totalMs = avFormatContext->duration / (AV_TIME_BASE / 1000);
     LOGD("totalMs = %d ", totalMs);
+    mux.unlock();
     getVPara();
     getAPara();
     return true;
@@ -39,12 +52,17 @@ bool FFDemux::open(const char *url) {
 
 //读取一帧数据，数据由调用者清理
 XData FFDemux::read() {
-    if (!avFormatContext)return XData();
+    mux.lock();
+    if (!avFormatContext) {
+        mux.unlock();
+        return XData();
+    }
     XData data;
     AVPacket *pkt = av_packet_alloc();
     int re = av_read_frame(avFormatContext, pkt);
     if (re != 0) {
         av_packet_free(&pkt);
+        mux.unlock();
         return XData();
     }
     LOGD("pkt size is %d ,pts %lld", pkt->size, pkt->pts);
@@ -62,6 +80,7 @@ XData FFDemux::read() {
     pkt->dts = pkt->dts * 1000 * r2d(avFormatContext->streams[pkt->stream_index]->time_base);
     data.pts = (int) pkt->pts;
 //    LOGD("demux pts %d ", data.pts);
+    mux.unlock();
     return data;
 }
 
@@ -79,31 +98,36 @@ FFDemux::FFDemux() {
 }
 
 XParameter FFDemux::getVPara() {
+    mux.lock();
     if (!avFormatContext) {
         LOGE("getVPara failed avFormatContext is null");
-
+        mux.unlock();
         return XParameter();
     }
     int re = av_find_best_stream(avFormatContext, AVMEDIA_TYPE_VIDEO, -1, -1, 0, 0);
     if (re < 0) {
         LOGE("av_find_best_stream failed");
+        mux.unlock();
         return XParameter();
     }
     videoStream = re;
     XParameter para;
     para.para = avFormatContext->streams[re]->codecpar;
+    mux.unlock();
     return para;
 }
 
 XParameter FFDemux::getAPara() {
+    mux.lock();
     if (!avFormatContext) {
         LOGE("getAPara failed avFormatContext is null");
-
+        mux.unlock();
         return XParameter();
     }
     int re = av_find_best_stream(avFormatContext, AVMEDIA_TYPE_AUDIO, -1, -1, 0, 0);
     if (re < 0) {
         LOGE("av_find_best_stream failed");
+        mux.unlock();
         return XParameter();
     }
     audioStream = re;
@@ -111,5 +135,6 @@ XParameter FFDemux::getAPara() {
     para.para = avFormatContext->streams[re]->codecpar;
     para.channels = para.para->channels;
     para.sample_rate = para.para->sample_rate;
+    mux.unlock();
     return para;
 }

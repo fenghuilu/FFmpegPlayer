@@ -13,6 +13,8 @@ class IResample : public IObserver {
 public:
     virtual bool open(XParameter in, XParameter out = XParameter()) = 0;
 
+    virtual void close() = 0;
+
     virtual XData resample(XData indata) = 0;
 
     virtual void update(XData indata);

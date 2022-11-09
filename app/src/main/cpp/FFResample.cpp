@@ -10,7 +10,17 @@ extern "C" {
 #include "FFResample.h"
 #include "LogCommon.h"
 
+void FFResample::close() {
+    mux.lock();
+    if (actx) {
+        swr_free(&actx);
+    }
+    mux.unlock();
+}
+
 bool FFResample::open(XParameter in, XParameter out) {
+    close();
+    mux.lock();
     if (in.para->format)
         actx = swr_alloc();
     actx = swr_alloc_set_opts(actx,
@@ -23,21 +33,27 @@ bool FFResample::open(XParameter in, XParameter out) {
     int re = swr_init(actx);
     if (re != 0) {
         LOGD("swr_init FAILED");
+        mux.unlock();
         return false;
     } else {
         LOGD("swr_init SUCCESS");
     }
     outChannels = in.para->channels;
     outFormat = AV_SAMPLE_FMT_S16;
+    mux.unlock();
     return true;
 }
 
 XData FFResample::resample(XData indata) {
     LOGD("resample size id %d ", indata.size);
-    if (indata.size <= 0 || !indata.data)
+    if (indata.size <= 0 || !indata.data) {
         return XData();
-    if (!actx)
+    }
+    mux.lock();
+    if (!actx) {
+        mux.unlock();
         return XData();
+    }
     AVFrame *frame = (AVFrame *) indata.data;
 
 //输出空间分配
@@ -52,11 +68,14 @@ XData FFResample::resample(XData indata) {
     int len = swr_convert(actx, outArr, frame->nb_samples, (const uint8_t **) frame->data,
                           frame->nb_samples);
     if (len <= 0) {
+        mux.unlock();
         out.drop();
         return XData();
 
     }
     out.pts = indata.pts;
+    mux.unlock();
+
 //    LOGD("swr_convert success = %d ",len);
     return out;
 }

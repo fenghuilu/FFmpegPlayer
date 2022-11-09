@@ -14,8 +14,22 @@ void FFDecode::initHard(void *vm) {
     av_jni_set_java_vm(vm, 0);
 }
 
+void FFDecode::close() {
+    mux.lock();
+    pts = 0;
+    if (avFrame) {
+        av_frame_free(&avFrame);
+    }
+    if (avCodecContext) {
+        avcodec_close(avCodecContext);
+        avcodec_free_context(&avCodecContext);
+    }
+    mux.unlock();
+}
+
 bool FFDecode::open(XParameter parameter, bool isHard) {
     LOGD("FFDecode::open  %d ", isHard);
+    close();
     if (!parameter.para) {
         LOGD("!parameter.para???");
         return false;
@@ -30,6 +44,7 @@ bool FFDecode::open(XParameter parameter, bool isHard) {
         return false;
     }
     LOGD("avcodec_find_decoder success %d ", isHard);
+    mux.lock();
     //创建解码器上下文,并复制参数
     avCodecContext = avcodec_alloc_context3(avCodec);
     avcodec_parameters_to_context(avCodecContext, p);
@@ -38,6 +53,7 @@ bool FFDecode::open(XParameter parameter, bool isHard) {
     int re = avcodec_open2(avCodecContext, 0, 0);
     if (re != 0) {
         LOGE("avcodec_open2 failed %s ", av_err2str(re));
+        mux.unlock();
         return false;
     }
     if (avCodecContext->codec_type == AVMEDIA_TYPE_VIDEO) {
@@ -47,28 +63,33 @@ bool FFDecode::open(XParameter parameter, bool isHard) {
         LOGD("avcodec_open2 audio success");
         this->isAudio = true;
     }
+    mux.unlock();
     return true;
 }
 
 bool FFDecode::sendPacket(XData pkt) {
     if (pkt.size <= 0 || !pkt.data)return false;
+    mux.lock();
     if (!avCodecContext) {
+        mux.unlock();
         return false;
     }
     int re = avcodec_send_packet(avCodecContext, (AVPacket *) pkt.data);
+    mux.unlock();
     if (re != 0) {
         LOGE("avcodec_send_packet failed %s ", av_err2str(re));
         return false;
     } else {
 //        LOGE("avcodec_send_packet success %d ", pkt.size);
     }
-
     return true;
 }
 
 //从线程中获取解码结果
 XData FFDecode::recvFrame() {
+    mux.lock();
     if (!avCodecContext) {
+        mux.unlock();
         return XData();
     }
     if (!avFrame) {
@@ -81,6 +102,7 @@ XData FFDecode::recvFrame() {
         } else {
             LOGE("avcodec_receive_frame failed %s ", av_err2str(re));
         }
+        mux.unlock();
         return XData();
     } else {
 //        LOGE("avcodec_receive_frame success ");
@@ -133,5 +155,7 @@ XData FFDecode::recvFrame() {
         memcpy(d.datas, avFrame->data, sizeof(d.datas));
     }
     d.pts = avFrame->pts;
+    pts = d.pts;
+    mux.unlock();
     return d;
 }
