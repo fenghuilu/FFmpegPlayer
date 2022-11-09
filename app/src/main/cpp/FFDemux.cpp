@@ -7,6 +7,11 @@ extern "C" {
 
 #include "FFDemux.h"
 
+//分数转为浮点数
+static double r2d(AVRational r) {
+    return r.num == 0 || r.den == 0 ? 0. : (double) r.num / (double) r.den;
+}
+
 //打开文件或者流媒体 rtsp rmtp http
 bool FFDemux::open(const char *url) {
     LOGD("open %s", url);
@@ -45,13 +50,18 @@ XData FFDemux::read() {
     LOGD("pkt size is %d ,pts %lld", pkt->size, pkt->pts);
     data.data = (unsigned char *) pkt;
     data.size = pkt->size;
-    if(pkt->stream_index == audioStream){
+    if (pkt->stream_index == audioStream) {
         data.isAudio = true;
-    }else if(pkt->stream_index == videoStream){
+    } else if (pkt->stream_index == videoStream) {
         data.isAudio = false;
     } else {
         av_packet_free(&pkt);
     }
+    //转换pts
+    pkt->pts = pkt->pts * 1000 * r2d(avFormatContext->streams[pkt->stream_index]->time_base);
+    pkt->dts = pkt->dts * 1000 * r2d(avFormatContext->streams[pkt->stream_index]->time_base);
+    data.pts = (int) pkt->pts;
+//    LOGD("demux pts %d ", data.pts);
     return data;
 }
 
@@ -84,6 +94,7 @@ XParameter FFDemux::getVPara() {
     para.para = avFormatContext->streams[re]->codecpar;
     return para;
 }
+
 XParameter FFDemux::getAPara() {
     if (!avFormatContext) {
         LOGE("getAPara failed avFormatContext is null");

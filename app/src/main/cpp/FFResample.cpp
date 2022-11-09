@@ -36,7 +36,7 @@ XData FFResample::resample(XData indata) {
     LOGD("resample size id %d ", indata.size);
     if (indata.size <= 0 || !indata.data)
         return XData();
-    if(!actx)
+    if (!actx)
         return XData();
     AVFrame *frame = (AVFrame *) indata.data;
 
@@ -56,6 +56,7 @@ XData FFResample::resample(XData indata) {
         return XData();
 
     }
+    out.pts = indata.pts;
 //    LOGD("swr_convert success = %d ",len);
     return out;
 }

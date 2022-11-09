@@ -8,6 +8,14 @@
 void IDecode::run() {
     while (!isExit) {
         pktsmutex.lock();
+        //判断音视频同步
+        if (!isAudio && synPts > 0) {
+            if (synPts < pts) {
+                pktsmutex.unlock();
+                XSleep(1);
+                continue;
+            }
+        }
         if (pkts.empty()) {
             pktsmutex.unlock();
             XSleep(1);
@@ -22,11 +30,12 @@ void IDecode::run() {
                 if (!frame.data) {
                     break;
                 }
-                if(frame.isAudio){
-                    LOGD("recv Audio Frame size is %d",frame.size);
+                if (frame.isAudio) {
+                    LOGD("recv Audio Frame size is %d", frame.size);
                 } else {
-                    LOGD("recv video Frame size is %d",frame.size);
+                    LOGD("recv video Frame size is %d", frame.size);
                 }
+                pts = frame.pts;
                 this->notify(frame);
             }
         }

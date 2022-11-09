@@ -9,15 +9,17 @@ XData IAudioPlay::getData() {
     XData data;
     while (!isExit){
         framesMutex.lock();
-        if(!frames.empty()){
+        if(!frames.empty()){//有数据的情况
             data = frames.front();
             frames.pop_front();
             framesMutex.unlock();
+            pts = data.pts;
             return data;
         }
         framesMutex.unlock();
         XSleep(1);
     }
+    //未获取数据异常走这里
     return data;
 }
 

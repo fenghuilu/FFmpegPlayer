@@ -7,7 +7,7 @@
 
 #include "XThread.h"
 #include "XParameter.h"
-
+#include <mutex>
 class IDemux;
 
 class IDecode;
@@ -27,6 +27,7 @@ public:
     virtual bool start();
 
     virtual void initView(void *win);
+
     //是否视频硬解码
     bool isHardDecode = true;
 
@@ -39,6 +40,10 @@ public:
     //音频输出参数配置
     XParameter outPara;
 protected:
+    //用作音视频同步
+    void run();
+
+    std::mutex mux;
 
     IPlayer() {};
 };

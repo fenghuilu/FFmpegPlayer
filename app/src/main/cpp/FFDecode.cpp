@@ -120,7 +120,7 @@ XData FFDecode::recvFrame() {
                        avFrame->width / 2);
             }
         } else {//NV21,NV12
-            memcpy(d.datas,avFrame->data, sizeof(d.datas));
+            memcpy(d.datas, avFrame->data, sizeof(d.datas));
         }
     } else {
         //样本字节数*单通道样本数*通道数
@@ -132,5 +132,6 @@ XData FFDecode::recvFrame() {
 //             avFrame->nb_samples);
         memcpy(d.datas, avFrame->data, sizeof(d.datas));
     }
+    d.pts = avFrame->pts;
     return d;
 }
