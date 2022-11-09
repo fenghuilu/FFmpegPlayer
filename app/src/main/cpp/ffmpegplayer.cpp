@@ -1,21 +1,15 @@
 #include <jni.h>
 #include <string>
 #include <android/native_window_jni.h>
-#include "FFDemux.h"
-#include "IDecode.h"
-#include "FFDecode.h"
-#include "FFResample.h"
-#include "XEGL.h"
-#include "XShader.h"
-#include "IVideoView.h"
-#include "GLVideoView.h"
-#include "IAudioPlay.h"
-#include "SLAudioPlay.h"
+#include "LogCommon.h"
+#include "IPlayerProxy.h"
+
 
 #define LOG_TAG "ffmpegplayer_tag"
-IVideoView *view;
-extern "C" JNIEXPORT jint JNI_OnLoad(JavaVM *vm,void *res){
-    FFDecode::initHard(vm);
+static IPlayer *player = NULL;
+extern "C" JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *res) {
+    LOGD("JNI_OnLoad");
+    IPlayerProxy::get()->init(vm);
     return JNI_VERSION_1_4;
 }
 extern "C" JNIEXPORT jstring JNICALL
@@ -24,31 +18,8 @@ Java_com_feng_ffmpegplayer_MainActivity_open(
         jobject thiz, jstring url_) {
     LOGD("open");
     const char *url = env->GetStringUTFChars(url_, JNI_FALSE);
-    IDemux *demux = new FFDemux();
-    IDecode *vdecode = new FFDecode();
-    IDecode *adecode = new FFDecode();
-    view = new GLVideoView();
-
-    demux->addObs(vdecode);
-    demux->addObs(adecode);
-    vdecode->addObs(view);
-
-    IResample *resample = new FFResample();
-    adecode->addObs(resample);
-
-    demux->open(url);
-    vdecode->open(demux->getVPara(),true);
-    adecode->open(demux->getAPara());
-    XParameter outPara = demux->getAPara();
-    resample->open(demux->getAPara(), outPara);
-    resample->open(demux->getAPara());
-    IAudioPlay *audioPlay = new SLAudioPlay();
-    audioPlay->startPlay(outPara);
-    resample->addObs(audioPlay);
-
-    demux->start();
-    vdecode->start();
-    adecode->start();
+    IPlayerProxy::get()->open(url);
+    IPlayerProxy::get()->start();
 
     env->ReleaseStringUTFChars(url_, url);
 
@@ -61,5 +32,5 @@ Java_com_feng_ffmpegplayer_XPlay_initView(JNIEnv *env, jobject thiz, jobject sur
     // TODO: implement initView()
     LOGD("initView");
     ANativeWindow *win = ANativeWindow_fromSurface(env, surface);
-    view->setRender(win);
+    IPlayerProxy::get()->initView(win);
 }

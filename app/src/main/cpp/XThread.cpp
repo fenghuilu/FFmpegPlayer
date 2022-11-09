@@ -14,10 +14,11 @@ void XSleep(int ms) {
     this_thread::sleep_for(du);
 }
 
-void XThread::start() {
+bool XThread::start() {
     isExit = false;
     thread th(&XThread::threadMain, this);
     th.detach();
+    return true;
 }
 
 void XThread::stop() {
