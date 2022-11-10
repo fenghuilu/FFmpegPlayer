@@ -22,7 +22,6 @@ Java_com_feng_ffmpegplayer_MainActivity_open(
     IPlayerProxy::get()->start();
 
     env->ReleaseStringUTFChars(url_, url);
-
     std::string hello = "Hello from C++";
     return env->NewStringUTF(hello.c_str());
 }

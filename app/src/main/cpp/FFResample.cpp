@@ -11,6 +11,7 @@ extern "C" {
 #include "LogCommon.h"
 
 void FFResample::close() {
+    LOGD("FFResample::close()");
     mux.lock();
     if (actx) {
         swr_free(&actx);
@@ -20,6 +21,7 @@ void FFResample::close() {
 
 bool FFResample::open(XParameter in, XParameter out) {
     close();
+    LOGD("FFResample::open()");
     mux.lock();
     if (in.para->format)
         actx = swr_alloc();
@@ -41,6 +43,7 @@ bool FFResample::open(XParameter in, XParameter out) {
     outChannels = in.para->channels;
     outFormat = AV_SAMPLE_FMT_S16;
     mux.unlock();
+    LOGD("FFResample open success");
     return true;
 }
 

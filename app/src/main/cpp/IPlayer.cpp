@@ -86,10 +86,10 @@ bool IPlayer::open(const char *path) {
         LOGD("adecode open failed");
 //        return false;
     }
-    if (outPara.sample_rate <= 0) {
+//    if (outPara.sample_rate <= 0) {
         outPara = demux->getAPara();
-    }
-    if (!resample || resample->open(demux->getAPara(), outPara)) {
+//    }
+    if (!resample || !resample->open(demux->getAPara(), outPara)) {
         LOGD("resample open failed");
     }
     mux.unlock();
@@ -97,6 +97,7 @@ bool IPlayer::open(const char *path) {
 }
 
 bool IPlayer::start() {
+    LOGD("IPlayer::start()");
     mux.lock();
     if (!audioPlayer || !audioPlayer->startPlay(outPara)) {
         LOGE("demux start false");
@@ -112,13 +113,19 @@ bool IPlayer::start() {
         LOGE("demux start false");
         return false;
     }
+    LOGE("IPlayer::start() success 1");
+
     XThread::start();
+    LOGE("IPlayer::start() success 2");
     mux.unlock();
+    LOGE("IPlayer::start() success");
+
     return true;
 }
 
 void IPlayer::initView(void *win) {
     if (videoView) {
+        videoView->close();
         videoView->setRender(win);
     }
 }

@@ -15,6 +15,7 @@ import javax.microedition.khronos.opengles.GL10;
 public class XPlay extends GLSurfaceView implements SurfaceHolder.Callback ,GLSurfaceView.Renderer{
     public XPlay(Context context, AttributeSet attrs) {
         super(context, attrs);
+        setRenderer(this);
     }
 
     @Override
@@ -22,7 +23,7 @@ public class XPlay extends GLSurfaceView implements SurfaceHolder.Callback ,GLSu
 //        super.surfaceCreated(holder);
         //初始化EGL
         Log.d("haha","surfaceCreated");
-        setRenderer(this);
+//        setRenderer(this);
         initView(holder.getSurface());
     }
 

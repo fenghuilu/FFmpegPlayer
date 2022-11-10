@@ -50,7 +50,9 @@ void SLAudioPlay::playCall(void *bufq) {
     }
     memcpy(buf, data.data, data.size);
     mux.lock();
-    (*bf)->Enqueue(bf, data.data, data.size);
+    if (pcmQue && (*pcmQue)) {
+        (*pcmQue)->Enqueue(pcmQue, data.data, data.size);
+    }
     mux.unlock();
     data.drop();
 }
@@ -64,33 +66,44 @@ void pcmCall(SLAndroidSimpleBufferQueueItf bf, void *context) {
 }
 
 void SLAudioPlay::close() {
+    LOGD("SLAudioPlay::close");
     IAudioPlay::clear();
     mux.lock();
     //停止播放
-    if(iplayer && (*iplayer)){
-        (*iplayer)->SetPlayState(iplayer,SL_PLAYSTATE_STOPPED);
+    if (iplayer && (*iplayer)) {
+        (*iplayer)->SetPlayState(iplayer, SL_PLAYSTATE_STOPPED);
     }
+    LOGD("SLAudioPlay::close 1");
+
     //清理播放队列
-    if(pcmQue && (*pcmQue)){
+    if (pcmQue && (*pcmQue)) {
         (*pcmQue)->Clear(pcmQue);
     }
     //销毁播放器对象
-    if(player && (*player)){
+    if (player && (*player)) {
         (*player)->Destroy(player);
     }
     //销毁混音器
-    if(mix && (*mix)){
+    if (mix && (*mix)) {
         (*mix)->Destroy(mix);
     }
     //销毁播放引擎
-    if(engineSL && (*engineSL)){
+    if (engineSL && (*engineSL)) {
         (*engineSL)->Destroy(engineSL);
     }
+    engineSL = NULL;
+    eng = NULL;
+    mix = NULL;
+    player = NULL;
+    iplayer = NULL;
+    pcmQue = NULL;
     mux.unlock();
+    LOGD("SLAudioPlay::close SUCCESS");
 }
 
 bool SLAudioPlay::startPlay(XParameter parameter) {
     close();
+    LOGD("SLAudioPlay::startPlay SUCCESS");
     mux.lock();
     //创建引擎
     eng = createSL();

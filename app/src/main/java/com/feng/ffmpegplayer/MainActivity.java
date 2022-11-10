@@ -1,9 +1,11 @@
 package com.feng.ffmpegplayer;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatSeekBar;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
@@ -13,14 +15,27 @@ public class MainActivity extends AppCompatActivity {
         System.loadLibrary("ffmpegplayer");
     }
 
+    AppCompatSeekBar mSeekBar;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Log.d("haha", "MainActivity onCreate"+getCacheDir().getPath());
+        Log.d("haha", "MainActivity onCreate" + getCacheDir().getPath());
 
-        open("/sdcard/Android/data/com.feng.ffmpegplayer/cache/test.mp4");
-//        open("/data/user/0/com.feng.ffmpegplayer/cache/test.mp4");
+        findViewById(R.id.openLOCAL).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                open("/sdcard/Android/data/com.feng.ffmpegplayer/cache/test.mp4");
+            }
+        });
+        findViewById(R.id.openRTSP).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                open("rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mp4");
+            }
+        });
+        mSeekBar = findViewById(R.id.seek_bar);
     }
 
     /**
