@@ -20,6 +20,10 @@ public:
 
     virtual bool startPlay(XParameter parameter) = 0;
 
+    virtual void close() = 0;
+
+    virtual void clear();
+
 //最大缓冲
     int maxFrame = 100;
     int pts = 0;

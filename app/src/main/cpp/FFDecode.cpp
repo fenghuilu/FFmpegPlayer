@@ -15,6 +15,7 @@ void FFDecode::initHard(void *vm) {
 }
 
 void FFDecode::close() {
+    IDecode::clear();
     mux.lock();
     pts = 0;
     if (avFrame) {

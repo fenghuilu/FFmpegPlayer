@@ -11,22 +11,38 @@ class CXTexture : public XTexture {
 public:
     XShader sh;
     XTextureType textureType;
+    std::mutex mux;
+
+    virtual void drop() {
+        mux.lock();
+        XEGL::get()->close();
+        sh.close();
+        mux.unlock();
+        delete this;
+    }
 
     virtual bool init(void *win, XTextureType type) {
+        mux.lock();
+        XEGL::get()->close();
+        sh.close();
         if (!win) {
+            mux.unlock();
             return false;
         }
 
         if (!XEGL::get()->init(win)) {
+            mux.unlock();
             return false;
         }
         sh.init((XShaderType) type);
         textureType = type;
+        mux.unlock();
         return true;
     }
 
     virtual void draw(unsigned char *data[], int width, int height) {
         LOGD("XTexture draw");
+        mux.lock();
         sh.getTexture(0, width, height, data[0]);//Y
         if (textureType == XTEXTURE_YUV420P) {
             sh.getTexture(1, width / 2, height / 2, data[1]);//U
@@ -36,6 +52,7 @@ public:
         }
         sh.draw();
         XEGL::get()->draw();
+        mux.unlock();
     }
 };
 

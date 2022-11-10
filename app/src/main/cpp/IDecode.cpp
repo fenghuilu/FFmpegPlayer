@@ -4,7 +4,16 @@
 
 #include "IDecode.h"
 #include "LogCommon.h"
-
+void IDecode::clear() {
+    pktsmutex.lock();
+    while (!pkts.empty()){
+        pkts.front().drop();
+        pkts.pop_front();
+    }
+    pts = 0;
+    synPts = 0;
+    pktsmutex.unlock();
+}
 void IDecode::run() {
     while (!isExit) {
         pktsmutex.lock();

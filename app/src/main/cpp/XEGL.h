@@ -10,6 +10,8 @@ class XEGL {
 public:
     virtual bool init(void *win) = 0;
 
+    virtual void close() = 0;
+
     static XEGL *get();
 
     virtual void draw() = 0;

@@ -33,7 +33,44 @@ void IPlayer::run() {
     }
 }
 
+void IPlayer::close() {
+    mux.lock();
+    //先关闭主体线程，再清理观察者
+    //音视频同步线程
+    XThread::stop();
+    //解封装
+    if (demux)
+        demux->stop();
+    //解码
+    if (vdecode)
+        vdecode->stop();
+    if (adecode)
+        adecode->stop();
+    //清理缓冲队列
+    if (vdecode)
+        vdecode->clear();
+    if (adecode)
+        adecode->clear();
+    if (audioPlayer)
+        audioPlayer->clear();
+
+    //清理资源
+    if (audioPlayer)
+        audioPlayer->close();
+    if (videoView)
+        videoView->close();
+    if (adecode)
+        adecode->close();
+    if (vdecode)
+        vdecode->close();
+    if (demux)
+        demux->close();
+
+    mux.unlock();
+}
+
 bool IPlayer::open(const char *path) {
+    close();
     mux.lock();
     if (!demux || !demux->open(path)) {
         LOGD("demux failed");
@@ -61,19 +98,19 @@ bool IPlayer::open(const char *path) {
 
 bool IPlayer::start() {
     mux.lock();
-    if (!demux || !demux->start()) {
-        mux.unlock();
-        LOGE("demux start false");
-        return false;
-    }
-    if (!adecode || !adecode->start()) {
-        LOGE("demux start false");
-    }
     if (!audioPlayer || !audioPlayer->startPlay(outPara)) {
         LOGE("demux start false");
     }
     if (!vdecode || !vdecode->start()) {
         LOGE("demux start false");
+    }
+    if (!adecode || !adecode->start()) {
+        LOGE("demux start false");
+    }
+    if (!demux || !demux->start()) {
+        mux.unlock();
+        LOGE("demux start false");
+        return false;
     }
     XThread::start();
     mux.unlock();

@@ -4,6 +4,7 @@
 
 #ifndef FFMPEGPLAYER_IPLAYERPROXY_H
 #define FFMPEGPLAYER_IPLAYERPROXY_H
+
 #include "IPlayer.h"
 
 #include <mutex>
@@ -15,9 +16,11 @@ public:
         return &proxy;
     }
 
-    void init(void *vm =0);
+    void init(void *vm = 0);
 
     virtual bool open(const char *path);
+
+    virtual void close();
 
     virtual bool start();
 

@@ -20,6 +20,11 @@ public:
 
     virtual void draw(unsigned char *data[], int width, int height) = 0;
 
+    virtual void drop() = 0;
+
+    virtual ~XTexture() {};
+protected:
+    XTexture() {};
 };
 
 

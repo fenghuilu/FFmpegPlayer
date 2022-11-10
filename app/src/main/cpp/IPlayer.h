@@ -8,6 +8,7 @@
 #include "XThread.h"
 #include "XParameter.h"
 #include <mutex>
+
 class IDemux;
 
 class IDecode;
@@ -23,6 +24,8 @@ public:
     static IPlayer *get(unsigned char index = 0);
 
     virtual bool open(const char *path);
+
+    virtual void close();
 
     virtual bool start();
 

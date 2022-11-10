@@ -5,6 +5,14 @@
 #include "IPlayerProxy.h"
 #include "FFPlayerBuilder.h"
 
+void IPlayerProxy::close() {
+    mux.lock();
+    if (player) {
+        player->close();
+    }
+    mux.unlock();
+}
+
 void IPlayerProxy::init(void *vm) {
     mux.lock();
     if (vm) {

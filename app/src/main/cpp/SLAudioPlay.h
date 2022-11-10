@@ -6,7 +6,7 @@
 
 #include "IAudioPlay.h"
 #include "LogCommon.h"
-
+#include <mutex>
 #define LOG_TAG "SLAudioPlay" // 这个是自定义的LOG的标识
 
 
@@ -16,12 +16,13 @@ public:
 
     void playCall(void *bufq);
 
+    virtual void close();
     SLAudioPlay();
-
     virtual ~SLAudioPlay();
 
 protected:
     unsigned char *buf = 0;
+    std::mutex mux;
 };
 
 

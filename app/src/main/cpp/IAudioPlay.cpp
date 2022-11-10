@@ -5,11 +5,20 @@
 #include "IAudioPlay.h"
 #include "LogCommon.h"
 
+void IAudioPlay::clear() {
+    framesMutex.lock();
+    while (!frames.empty()) {
+        frames.front().drop();
+        frames.pop_front();
+    }
+    framesMutex.unlock();
+}
+
 XData IAudioPlay::getData() {
     XData data;
-    while (!isExit){
+    while (!isExit) {
         framesMutex.lock();
-        if(!frames.empty()){//有数据的情况
+        if (!frames.empty()) {//有数据的情况
             data = frames.front();
             frames.pop_front();
             framesMutex.unlock();
