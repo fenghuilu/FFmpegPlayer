@@ -22,7 +22,7 @@ public:
     bool open(XParameter parameter, bool isHard = false);
 
     void close();
-
+    virtual void clear();
 //future模型 发送数据到线程解码
     virtual bool sendPacket(XData pkt);
 

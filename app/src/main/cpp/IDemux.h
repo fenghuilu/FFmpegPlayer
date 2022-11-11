@@ -15,7 +15,11 @@ public:
     int totalMs = 0;
 
     //打开文件或者流媒体 rtsp rmtp http
-    virtual bool open(const char *url) =0;
+    virtual bool open(const char *url) = 0;
+
+//0.0~1.0
+    virtual bool seek(double pos) = 0;
+
     virtual void close() = 0;
 
     //读取一帧数据，数据由调用者清理

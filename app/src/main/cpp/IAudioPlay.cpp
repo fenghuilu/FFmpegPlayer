@@ -16,7 +16,12 @@ void IAudioPlay::clear() {
 
 XData IAudioPlay::getData() {
     XData data;
+    isRuning = true;
     while (!isExit) {
+        if (isPause()) {
+            XSleep(2);
+            continue;
+        }
         framesMutex.lock();
         if (!frames.empty()) {//有数据的情况
             data = frames.front();
@@ -28,6 +33,7 @@ XData IAudioPlay::getData() {
         framesMutex.unlock();
         XSleep(1);
     }
+    isRuning = false;
     //未获取数据异常走这里
     return data;
 }

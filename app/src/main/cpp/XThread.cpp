@@ -14,8 +14,19 @@ void XSleep(int ms) {
     this_thread::sleep_for(du);
 }
 
+void XThread::pause(bool pause) {
+    mIsPause = pause;
+    for (int i = 0; i < 10; ++i) {
+        if (isPausing == pause) {
+            break;
+        }
+        XSleep(10);
+    }
+}
+
 bool XThread::start() {
     isExit = false;
+    mIsPause = false;
     thread th(&XThread::threadMain, this);
     th.detach();
     return true;
@@ -23,8 +34,8 @@ bool XThread::start() {
 
 void XThread::stop() {
     isExit = true;
-    for(int i =0;i<200;i++){
-        if(!isRuning){
+    for (int i = 0; i < 200; i++) {
+        if (!isRuning) {
             LOGD("stop 停止线程成功");
             return;
         }

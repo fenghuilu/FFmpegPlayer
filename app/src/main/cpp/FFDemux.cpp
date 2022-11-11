@@ -20,6 +20,29 @@ void FFDemux::close() {
     mux.unlock();
 }
 
+bool FFDemux::seek(double pos) {
+    bool re = false;
+    if (pos < 0 || pos > 1) {
+        LOGE("seek pos must 0~1");
+        return false;
+    }
+    mux.lock();
+    if (!avFormatContext) {
+        mux.unlock();
+        return false;
+    }
+    //清理读取的缓冲
+    avformat_flush(avFormatContext);
+    long long seekPts = 0;
+    seekPts = avFormatContext->streams[videoStream]->duration * pos;
+    //往后跳转关键帧
+    re = av_seek_frame(avFormatContext, videoStream, seekPts,
+                       AVSEEK_FLAG_FRAME | AVSEEK_FLAG_BACKWARD);
+    mux.unlock();
+
+    return re;
+}
+
 //打开文件或者流媒体 rtsp rmtp http
 bool FFDemux::open(const char *url) {
     LOGD("open %s", url);

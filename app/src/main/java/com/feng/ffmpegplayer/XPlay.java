@@ -5,6 +5,7 @@ import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.SurfaceHolder;
+import android.view.View;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -12,10 +13,11 @@ import javax.microedition.khronos.opengles.GL10;
 /**
  * created by lichaofeng on 2022/2/7
  */
-public class XPlay extends GLSurfaceView implements SurfaceHolder.Callback ,GLSurfaceView.Renderer{
+public class XPlay extends GLSurfaceView implements SurfaceHolder.Callback, GLSurfaceView.Renderer, View.OnClickListener {
     public XPlay(Context context, AttributeSet attrs) {
         super(context, attrs);
         setRenderer(this);
+        setOnClickListener(this);
     }
 
     @Override
@@ -53,4 +55,10 @@ public class XPlay extends GLSurfaceView implements SurfaceHolder.Callback ,GLSu
     public void onDrawFrame(GL10 gl) {
 
     }
+
+    @Override
+    public void onClick(View v) {
+        playOrPause();
+    }
+    native void playOrPause();
 }

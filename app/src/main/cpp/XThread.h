@@ -11,11 +11,23 @@ void XSleep(int ms);
 class XThread {
 public:
     virtual bool start();
+
     virtual void stop();
-    virtual void run(){}
+
+    virtual void pause(bool isPause);
+
+    bool isPause() {
+        isPausing = mIsPause;
+        return mIsPause;
+    }
+
+    virtual void run() {}
+
 protected:
     bool isExit = false;
     bool isRuning = false;
+    bool mIsPause = false;
+    bool isPausing = false;
 private:
     void threadMain();
 };

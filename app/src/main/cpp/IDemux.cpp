@@ -7,11 +7,16 @@
 
 void IDemux::run() {
     while (!isExit) {
+        if (isPause()) {
+            XSleep(2);
+            continue;
+        }
         XData d = read();
         if (d.size > 0) {
             notify(d);
         } else {
-            break;
+            XSleep(2);
+//            break;
         }
     }
 }

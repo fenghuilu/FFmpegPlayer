@@ -24,7 +24,15 @@ public:
 
     virtual bool start();
 
+    virtual bool isPause();
+
+    virtual void pause(bool pause);
+
     virtual void initView(void *win);
+
+    virtual double getProgress();
+
+    virtual bool seek(double pos);
 
 protected:
     IPlayer *player = 0;

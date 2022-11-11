@@ -6,9 +6,10 @@ import androidx.appcompat.widget.AppCompatSeekBar;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements Runnable {
 
     // Used to load the 'native-lib' library on application startup.
     static {
@@ -16,6 +17,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     AppCompatSeekBar mSeekBar;
+    private Thread thread;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +38,27 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         mSeekBar = findViewById(R.id.seek_bar);
+        mSeekBar.setMax(1000);
+        mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser) {
+
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                seek((double) seekBar.getProgress() / seekBar.getMax());
+            }
+        });
+        thread = new Thread(this);
+        thread.start();
     }
 
     /**
@@ -43,4 +66,20 @@ public class MainActivity extends AppCompatActivity {
      * which is packaged with this application.
      */
     public native String open(String url);
+
+    public native double getProgress();
+
+    public native boolean seek(double pos);
+
+    @Override
+    public void run() {
+        for (; ; ) {
+            mSeekBar.setProgress((int) (getProgress() * 1000));
+            try {
+                Thread.sleep(40);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 }

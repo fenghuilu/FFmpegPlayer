@@ -16,6 +16,10 @@ void IDecode::clear() {
 }
 void IDecode::run() {
     while (!isExit) {
+        if (isPause()) {
+            XSleep(2);
+            continue;
+        }
         pktsmutex.lock();
         //判断音视频同步
         if (!isAudio && synPts > 0) {

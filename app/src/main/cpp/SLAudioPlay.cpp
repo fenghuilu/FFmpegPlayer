@@ -175,6 +175,7 @@ bool SLAudioPlay::startPlay(XParameter parameter) {
     (*iplayer)->SetPlayState(iplayer, SL_PLAYSTATE_PLAYING);
 //启动队列回调
     (*pcmQue)->Enqueue(pcmQue, "", 1);
+    isExit = false;
     LOGD("SLAudioPlay::startPlay success");
     mux.unlock();
     return true;

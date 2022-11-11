@@ -31,6 +31,13 @@ public:
 
     virtual void initView(void *win);
 
+    //获取当前进度0.0~1.0
+    virtual double getProgress();
+
+    virtual bool seek(double pos);
+
+    virtual void pause(bool pause);
+
     //是否视频硬解码
     bool isHardDecode = true;
 

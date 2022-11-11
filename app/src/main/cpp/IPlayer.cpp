@@ -46,6 +46,9 @@ void IPlayer::close() {
         vdecode->stop();
     if (adecode)
         adecode->stop();
+    if (audioPlayer) {
+        audioPlayer->stop();
+    }
     //清理缓冲队列
     if (vdecode)
         vdecode->clear();
@@ -69,6 +72,97 @@ void IPlayer::close() {
     mux.unlock();
 }
 
+double IPlayer::getProgress() {
+    double pos = 0.0;
+    mux.lock();
+    int total = 0;
+    if (demux) {
+        total = demux->totalMs;
+    }
+    if (total > 0) {
+        if (vdecode) {
+            pos = (double) vdecode->pts / (double) total;
+        }
+    }
+    mux.unlock();
+    return pos;
+}
+
+void IPlayer::pause(bool pause) {
+    mux.lock();
+    XThread::pause(pause);
+    if (demux) {
+        demux->pause(pause);
+    }
+    if (vdecode) {
+        vdecode->pause(pause);
+    }
+    if (adecode) {
+        adecode->pause(pause);
+    }
+    if (audioPlayer) {
+        audioPlayer->pause(pause);
+    }
+    mux.unlock();
+}
+
+bool IPlayer::seek(double pos) {
+    LOGD("IPlayer::seek %lf",pos);
+
+    bool re = false;
+    if (!demux)
+        return false;
+    //暂停所有线程
+    pause(true);
+    mux.lock();
+    //清理缓冲队列
+    if (vdecode) {
+        vdecode->clear();
+    }
+    if (adecode) {
+        adecode->clear();
+    }
+    if (audioPlayer) {
+        audioPlayer->clear();
+    }
+    if (demux) {
+        re = demux->seek(pos);
+    }
+    //解码到实际需要显示的帧
+    if (!vdecode) {
+        mux.unlock();
+        pause(false);
+        return re;
+    }
+    int seekPts = pos * demux->totalMs;
+    while (!isExit) {
+        XData pkt = demux->read();
+        if (pkt.size <= 0)break;
+        if (pkt.isAudio) {
+            if (pkt.pts < seekPts) {
+                pkt.drop();
+                continue;
+            }
+            demux->notify(pkt);
+            continue;
+        }
+        vdecode->sendPacket(pkt);
+        pkt.drop();
+        XData data = vdecode->recvFrame();
+        if (data.size <= 0) {
+            continue;
+        }
+        if (data.pts >= seekPts) {
+//            vdecode->notify(data);
+            break;
+        }
+    }
+    mux.unlock();
+    pause(false);
+    LOGD("IPlayer::seek success");
+    return re;
+}
+
 bool IPlayer::open(const char *path) {
     close();
     mux.lock();
@@ -87,7 +181,7 @@ bool IPlayer::open(const char *path) {
 //        return false;
     }
 //    if (outPara.sample_rate <= 0) {
-        outPara = demux->getAPara();
+    outPara = demux->getAPara();
 //    }
     if (!resample || !resample->open(demux->getAPara(), outPara)) {
         LOGD("resample open failed");
@@ -113,13 +207,9 @@ bool IPlayer::start() {
         LOGE("demux start false");
         return false;
     }
-    LOGE("IPlayer::start() success 1");
-
     XThread::start();
-    LOGE("IPlayer::start() success 2");
     mux.unlock();
     LOGE("IPlayer::start() success");
-
     return true;
 }
 
