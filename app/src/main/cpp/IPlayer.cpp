@@ -118,6 +118,7 @@ bool IPlayer::seek(double pos) {
     //清理缓冲队列
     if (vdecode) {
         vdecode->clear();
+        vdecode->clear();
     }
     if (adecode) {
         adecode->clear();
